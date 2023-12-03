@@ -3,7 +3,8 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 const { connectToDatabase, disconnectFromDatabase } = require("./config/db.js");
-const User = require('./models/userModel.js');
+const userRoutes = require('./routes/userRoutes');
+const courseRoutes = require('./routes/courseRoutes');
 
 
 app.use(cors({
@@ -17,15 +18,26 @@ app.get('/', (req, res) => {
 });
 app.use(express.json());
 
-
+connectToDatabase()
 
 // Routes
-const courseRoutes = require('./routes/courseRoutes');
-const authRoutes = require('./routes/authRoutes');
+app.use('/users', userRoutes);
+app.use('/courses', courseRoutes);
 
 app.use('/courses', courseRoutes);
 app.use('/auth', authRoutes);
-connectToDatabase()
+
+
+process.on('SIGINT', async () => {
+  await disconnectFromDatabase();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  await disconnectFromDatabase();
+  process.exit(0);
+});
+
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

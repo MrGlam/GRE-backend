@@ -1,38 +1,16 @@
-// routes/authRoutes.js
-
 const express = require('express');
 const router = express.Router();
-const User = require('../models/userModel');
-const bcrypt = require('bcrypt');
+const userController = require('../controllers/userController');
+const authMiddleware = require('../middlewares/authMiddleware');
 
-// Register a new user
-router.post('/register', async (req, res) => {
-  const { email, password } = req.body;
+// Public routes
+router.post('/register', userController.register);
+router.post('/login', userController.login);
 
-  // Validate input
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
-  }
-
-  // Check if the email is already taken
-  const existingUser = await User.findOne({ email });
-
-  if (existingUser) {
-    return res.status(409).json({ error: 'Email already exists' });
-  }
-
-  // Hash the password and save to the database
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new User({ email, password: hashedPassword });
-  const savedUser = await newUser.save();
-  try {
-    const savedUser = await newUser.save();
-    res.status(201).json({ message: 'User registered successfully', user: savedUser });
-  } catch (error) {
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Add login route and other authentication routes as needed...
+// Protected routes (require authentication)
+router.use(authMiddleware);
+router.get('/:userId', userController.getUserById);
+router.put('/update-profile', userController.updateUserProfile);
+router.delete('/delete-account', userController.deleteUserAccount);
 
 module.exports = router;
