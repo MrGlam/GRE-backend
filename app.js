@@ -21,11 +21,11 @@ app.use(express.json());
 connectToDatabase()
 
 // Routes
+
 app.use('/users', userRoutes);
 app.use('/courses', courseRoutes);
 
-app.use('/courses', courseRoutes);
-app.use('/auth', authRoutes);
+
 
 
 process.on('SIGINT', async () => {
