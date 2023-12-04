@@ -1,4 +1,4 @@
-const User = require('../models/User');
+const User = require('../models/user');
 const jwt = require('jsonwebtoken');
 
 const secretKey = 'your-secret-key'; // Change this with a secure secret key

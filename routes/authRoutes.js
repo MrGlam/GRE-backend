@@ -15,6 +15,6 @@ router.delete('/delete-account', userController.deleteUserAccount);
 
 // Admin-only route (require authentication and admin role)
 router.use(authMiddleware('admin'));
-router.get('/admin-dashboard', adminController.getAdminDashboard);
+// router.get('/admin-dashboard', adminController.getAdminDashboard);
 
 module.exports = router;

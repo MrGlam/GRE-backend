@@ -3,7 +3,7 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 const { connectToDatabase, disconnectFromDatabase } = require("./config/db.js");
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./routes/authRoutes.js');
 const courseRoutes = require('./routes/courseRoutes');
 
 
@@ -22,7 +22,7 @@ connectToDatabase()
 
 // Routes
 
-app.use('/users', userRoutes);
+app.use('/auth', userRoutes);
 app.use('/courses', courseRoutes);
 
 
