@@ -1,27 +1,25 @@
+const { generateToken } = require('../middlewares/authMiddleware');
 const User = require('../models/user');
-const jwt = require('jsonwebtoken');
 
-const secretKey = 'your-secret-key'; // Change this with a secure secret key
 
-const generateToken = (user) => {
-  return jwt.sign({ userId: user._id }, secretKey, { expiresIn: '1h' });
-};
 
 const userController = {
   register: async (req, res) => {
     try {
-      const { username, email, password } = req.body;
-
+      const { fullName, email, password } = req.body;
       // Check if the email or username is already taken
-      const existingUser = await User.findOne({ $or: [{ email }, { username }] });
-
+      const existingUser = await User.findOne({email:email });
       if (existingUser) {
         return res.status(400).json({ error: 'Email or username already exists' });
       }
-
-      const user = await User.create({ username, email, password });
-      const token = generateToken(user);
-      res.status(201).json({ user, token });
+      const user = await User.create({
+        fullName: fullName,
+        email: email,
+        password: password,
+        // role is not provided here, so it will default to 'user'
+      });
+      
+      res.status(201).json({ user });
     } catch (error) {
       res.status(500).json({ error: 'Registration failed' });
     }
@@ -35,8 +33,8 @@ const userController = {
       if (!user || user.password !== password) {
         return res.status(401).json({ error: 'Authentication failed' });
       }
-
-      const token = generateToken(user);
+      
+      const token = generateToken(user._id,user.role);
       res.status(200).json({ user, token });
     } catch (error) {
       res.status(500).json({ error: 'Login failed' });

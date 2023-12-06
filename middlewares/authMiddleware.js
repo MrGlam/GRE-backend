@@ -1,35 +1,28 @@
 const jwt = require('jsonwebtoken');
-const secretKey = 'your-secret-key'; // Replace with your actual secret key
+const secretKey = 'your-secret-key';
 
-const authMiddleware = (requiredRole) => (req, res, next) => {
-  // Get the token from the request headers
-  const token = req.headers.authorization;
+function generateToken(userId, role) {
+  return jwt.sign({ userId, role }, secretKey, { expiresIn: '1h' });
+}
 
-  // Check if the token is present
+function verifyToken(token) {
+  return jwt.verify(token, secretKey);
+}
+// isAdmin.js
+
+const isAdmin = (req, res, next) => {
+  const token = req.headers.authorization.split(' ')[1]; // Assuming the token is sent in the Authorization header
   if (!token) {
-    return res.status(401).json({ error: 'Authentication token missing' });
+    return res.status(403).json({ error: 'Forbidden' });
   }
 
-  // Verify the token
-  jwt.verify(token, secretKey, (err, decoded) => {
-    if (err) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
+  const decodedToken = verifyToken(token);
+  if (decodedToken && decodedToken.role === 'admin') {
+    return next();
+  }
 
-    // Check if the user has the required role
-    if (requiredRole && decoded.role !== requiredRole) {
-      return res.status(403).json({ error: 'Access forbidden. Insufficient privileges.' });
-    }
-
-    // Attach the user data to the request for further use in route handlers
-    req.userData = {
-      userId: decoded.userId,
-      role: decoded.role,
-    };
-
-    // Proceed to the next middleware or route handler
-    next();
-  });
+  return res.status(403).json({ error: 'Forbidden' });
 };
 
-module.exports = authMiddleware;
+
+module.exports = { isAdmin,generateToken, verifyToken };
