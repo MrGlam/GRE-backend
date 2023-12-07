@@ -1,20 +1,31 @@
+// coursesRouter.js
+
 const express = require('express');
 const router = express.Router();
 const courseController = require('../controllers/courseController');
-const authMiddleware = require('../middlewares/authMiddleware');
+const { authenticate } = require('../middlewares/authMiddleware');
+const { isAdmin } = require('../middlewares/isAdmin');
 
-// Public routes
+// Routes
+
+// Get all courses
 router.get('/', courseController.getAllCourses);
+
+// Get a specific course by ID
 router.get('/:courseId', courseController.getCourseById);
 
-// Protected routes for normal users (require authentication)
-// router.use(authMiddleware('user'));
-router.post('/:courseId/enroll', courseController.enrollUserInCourse);
+// Enroll a user in a course (requires authentication)
+router.post('/:courseId/enroll', authenticate, courseController.enrollUserInCourse);
 
-// Admin-only route (require authentication and admin role)
-// router.use(authMiddleware('admin'));
-// router.post('/create-course', courseController.createCourse);
-// router.put('/:courseId/update-course', courseController.updateCourse);
-// router.delete('/:courseId/delete-course', courseController.deleteCourse);
+// Create a new course (requires authentication and admin status)
+router.post('/create', authenticate, isAdmin, courseController.createCourse);
+
+// Update a course (requires authentication and admin status)
+router.put('/:courseId', authenticate, isAdmin, courseController.updateCourse);
+
+// Delete a course (requires authentication and admin status)
+router.delete('/:courseId', authenticate, isAdmin, courseController.deleteCourse);
+
+// Other course-related routes can be added as needed
 
 module.exports = router;

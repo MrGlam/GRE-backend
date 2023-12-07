@@ -1,3 +1,4 @@
+// authMiddleware.js
 const jwt = require('jsonwebtoken');
 const secretKey = 'your-secret-key';
 
@@ -8,21 +9,22 @@ function generateToken(userId, role) {
 function verifyToken(token) {
   return jwt.verify(token, secretKey);
 }
-// isAdmin.js
 
-const isAdmin = (req, res, next) => {
-  const token = req.headers.authorization.split(' ')[1]; // Assuming the token is sent in the Authorization header
+const authenticate = (req, res, next) => {
+  const token = req.headers.authorization;
+
   if (!token) {
-    return res.status(403).json({ error: 'Forbidden' });
+    return res.status(401).json({ error: 'Unauthorized: Token not provided' });
   }
 
-  const decodedToken = verifyToken(token);
-  if (decodedToken && decodedToken.role === 'admin') {
-    return next();
-  }
+  jwt.verify(token, secretKey, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    }
 
-  return res.status(403).json({ error: 'Forbidden' });
+    req.user = decoded; // Attach the decoded user information to the request object
+    next();
+  });
 };
 
-
-module.exports = { isAdmin,generateToken, verifyToken };
+module.exports = { authenticate, generateToken, verifyToken };

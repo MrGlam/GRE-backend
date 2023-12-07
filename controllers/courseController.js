@@ -1,4 +1,4 @@
-const Course = require('../models/Course');
+const Course = require('../models/course');
 const User = require('../models/user');
 
 const courseController = {
@@ -73,7 +73,6 @@ const courseController = {
       res.status(500).json({ error: 'Failed to create course' });
     }
   },
-
   updateCourse: async (req, res) => {
     try {
       const courseId = req.params.courseId;
